@@ -1,13 +1,19 @@
-import React, { useEffect, useCallback, useState, useContext } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { fabric } from "fabric";
-import { CanvasContext } from "./CanvasProvider";
 
 const Component = () => {
-  const { canvas, id } = useContext(CanvasContext);
+  const [canvas, setCanvas] = useState(null);
   const [colorToggled, setColorToggle] = useState(false);
   const [color, setColor] = useState("");
   const [activeObj, setActiveObj] = useState("");
   useEffect(() => {
+    if (!canvas) {
+      setCanvas(
+        new fabric.Canvas("canvasID", {
+          backgroundColor: "#e7e7e7"
+        })
+      );
+    }
     if (canvas) {
       canvas.on("selection:created", ({ selected }) => {
         setColor(selected[0].fill);
@@ -52,7 +58,7 @@ const Component = () => {
         }}
       >
         <p>presentation test</p>
-        <canvas id={id} width="800px" height="300px" />
+        <canvas id="canvasID" width="800px" height="300px" />
         <button type="button" onClick={() => rec()}>
           add rect
         </button>
