@@ -6,6 +6,7 @@ const Component = () => {
   const [colorToggled, setColorToggle] = useState(false);
   const [color, setColor] = useState("");
   const [activeObj, setActiveObj] = useState("");
+
   useEffect(() => {
     if (!canvas) {
       setCanvas(
@@ -15,17 +16,17 @@ const Component = () => {
       );
     }
     if (canvas) {
-      canvas.on("selection:created", ({ selected }) => {
-        setColor(selected[0].fill);
+      const fillColor = element => {
+        setColor(element[0].fill);
         setColorToggle(true);
         setActiveObj(canvas.getActiveObject());
         canvas.requestRenderAll();
+      };
+      canvas.on("selection:created", ({ selected }) => {
+        fillColor(selected);
       });
       canvas.on("selection:updated", ({ selected }) => {
-        setColor(selected[0].fill);
-        setColorToggle(true);
-        setActiveObj(canvas.getActiveObject());
-        canvas.requestRenderAll();
+        fillColor(selected);
       });
       canvas.on("selection:cleared", () => {
         setColorToggle(false);
@@ -33,6 +34,7 @@ const Component = () => {
       });
     }
   }, [canvas]);
+
   const changeColor = newColor => {
     setColor(newColor);
     activeObj.set({
@@ -40,6 +42,7 @@ const Component = () => {
     });
     canvas.renderAll();
   };
+
   const rec = useCallback(() => {
     const rect = new fabric.Rect({
       fill: "#252424",
@@ -48,6 +51,7 @@ const Component = () => {
     });
     return canvas.add(rect);
   }, [canvas]);
+
   return (
     <div style={{ marginLeft: "200px" }}>
       <div
@@ -60,7 +64,7 @@ const Component = () => {
         <p>presentation test</p>
         <canvas id="canvasID" width="800px" height="300px" />
         <button type="button" onClick={() => rec()}>
-          add rect
+          add rectangle
         </button>
         <button
           type="button"
