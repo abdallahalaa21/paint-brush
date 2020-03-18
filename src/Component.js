@@ -125,6 +125,27 @@ const Component = () => {
     return canvas.add(textElement);
   }, [canvas]);
 
+  const addImage = value => {
+    const reader = new FileReader();
+    reader.readAsDataURL(value);
+    reader.onload = f => {
+      const data = f.target.result;
+      fabric.Image.fromURL(data, img => {
+        let oImg;
+        if (img.width > img.height && img.width > canvas.width) {
+          oImg = img.set().scaleToWidth(canvas.width / 2, false);
+        } else if (img.height > img.width && img.height > canvas.height) {
+          oImg = img.set().scaleToHeight(canvas.height / 2, false);
+        } else if (img.height > canvas.height) {
+          oImg = img.set().scaleToHeight(canvas.height / 2, false);
+        } else {
+          oImg = img.set();
+        }
+        canvas.add(oImg).renderAll();
+      });
+    };
+  };
+
   const changeFont = size => {
     canvas.getActiveObject().set({
       fontSize: size
@@ -202,6 +223,7 @@ const Component = () => {
         >
           get directions
         </button>
+        <input type="file" onChange={e => addImage(e.target.files[0])} />
 
         {activeObj && (
           <button type="button" onClick={() => remove()}>
