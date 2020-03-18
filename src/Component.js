@@ -36,7 +36,7 @@ const Component = () => {
         if (canvas.getActiveObject().get("type") === "i-text") {
           setTextBackgroundColorToggled(true);
           setTextBackgroundColor(element[0].backgroundColor);
-        }
+        } else setTextBackgroundColorToggled(false);
       };
 
       const keyChanges = e => {
@@ -195,10 +195,26 @@ const Component = () => {
     activeObj.sendBackwards();
     canvas.renderAll();
   };
+
   const changeBackgroundColor = value => {
+    if (canvas.backgroundImage) {
+      canvas.backgroundImage = false;
+    }
     setBackgroundColor(value);
     canvas.backgroundColor = value;
     canvas.renderAll();
+  };
+
+  const changeBackgroundImage = value => {
+    const reader = new FileReader();
+    reader.onload = f => {
+      const data = f.target.result;
+      fabric.Image.fromURL(data, img => {
+        const oImg = img.set().scaleToWidth(canvas.width, false);
+        canvas.setBackgroundImage(oImg).renderAll();
+      });
+    };
+    reader.readAsDataURL(value);
   };
 
   const options = useMemo(() => [16, 18, 20, 22, 24, 26, 28, 30], []);
@@ -232,26 +248,40 @@ const Component = () => {
         >
           get directions
         </button>
-        <input type="file" onChange={e => addImage(e.target.files[0])} />
-
+        <label style={{ padding: "5px" }}>
+          add image
+          <input
+            style={{ margin: "0 10px " }}
+            placeholder=" add image"
+            type="file"
+            onChange={e => addImage(e.target.files[0])}
+          />
+        </label>
+        <hr />
         <label style={{ padding: "5px" }}>
           background Color
           <input
-            style={{ margin: "10px" }}
+            style={{ margin: "0 10px " }}
             type="color"
             value={backgroundColor}
             onChange={e => changeBackgroundColor(e.target.value)}
           />
         </label>
-
-        {activeObj && (
-          <button type="button" onClick={() => remove()}>
-            Delete
-          </button>
-        )}
-
+        <label>
+          add background image
+          <input
+            style={{ margin: "0 10px " }}
+            placeholder=" add image"
+            type="file"
+            onChange={e => changeBackgroundImage(e.target.files[0])}
+          />
+        </label>
         {colorToggled && activeObj && (
           <>
+            <hr />
+            <button type="button" onClick={() => remove()}>
+              Delete
+            </button>
             <label style={{ padding: "5px" }}>
               Color
               <input
