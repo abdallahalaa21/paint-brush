@@ -10,6 +10,10 @@ const Component = () => {
   const [backgroundColorToggled, setBackgroundColorToggled] = useState(false);
   const [backgroundColor, setBackgroundColor] = useState("");
 
+  const remove = useCallback(() => {
+    canvas.remove(canvas.getActiveObject());
+  }, [canvas]);
+
   useEffect(() => {
     if (!canvas) {
       setCanvas(
@@ -22,7 +26,6 @@ const Component = () => {
       const fillColor = element => {
         setColor(element[0].fill);
         setColorToggle(true);
-        setActiveObj(canvas.getActiveObject());
         canvas.requestRenderAll();
       };
 
@@ -33,11 +36,49 @@ const Component = () => {
         }
       };
 
+      const keyChanges = e => {
+        if (
+          (canvas.getActiveObject().get("type") === "i-text" &&
+            canvas.getActiveObject().selected) ||
+          canvas.getActiveObject().get("type") !== "i-text"
+        ) {
+          switch (e.keyCode) {
+            case 46:
+              remove();
+              break;
+            case 39: // move right
+              e.preventDefault();
+              canvas.getActiveObject().left += 1;
+              canvas.renderAll();
+              break;
+            case 37: // move left
+              e.preventDefault();
+              canvas.getActiveObject().left -= 1;
+              canvas.renderAll();
+              break;
+            case 40: // move down
+              e.preventDefault();
+              canvas.getActiveObject().top += 1;
+              canvas.renderAll();
+              break;
+            case 38: // move up
+              e.preventDefault();
+              canvas.getActiveObject().top -= 1;
+              canvas.renderAll();
+              break;
+            default:
+          }
+        }
+      };
+
       canvas.on("selection:created", ({ selected }) => {
+        setActiveObj(selected);
         fillBackground(selected);
         fillColor(selected);
+        document.addEventListener("keydown", keyChanges);
       });
       canvas.on("selection:updated", ({ selected }) => {
+        setActiveObj(selected);
         fillBackground(selected);
         fillColor(selected);
       });
@@ -45,10 +86,11 @@ const Component = () => {
         setColorToggle(false);
         setBackgroundColorToggled(false);
         setActiveObj(null);
+        document.removeEventListener("keydown", keyChanges);
         canvas.renderAll();
       });
     }
-  }, [canvas]);
+  }, [canvas, remove]);
 
   const changeColor = newColor => {
     setColor(newColor);
@@ -81,10 +123,6 @@ const Component = () => {
       fill: "#252424"
     });
     return canvas.add(textElement);
-  }, [canvas]);
-
-  const remove = useCallback(() => {
-    canvas.remove(canvas.getActiveObject());
   }, [canvas]);
 
   return (
