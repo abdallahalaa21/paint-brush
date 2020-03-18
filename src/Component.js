@@ -7,8 +7,11 @@ const Component = () => {
   const [colorToggled, setColorToggle] = useState(false);
   const [color, setColor] = useState("");
   const [activeObj, setActiveObj] = useState(null);
-  const [backgroundColorToggled, setBackgroundColorToggled] = useState(false);
-  const [backgroundColor, setBackgroundColor] = useState("");
+  const [textBackgroundColorToggled, setTextBackgroundColorToggled] = useState(
+    false
+  );
+  const [textBackgroundColor, setTextBackgroundColor] = useState("");
+  const [backgroundColor, setBackgroundColor] = useState("#e7e7e7");
 
   const remove = useCallback(() => {
     canvas.remove(canvas.getActiveObject());
@@ -18,7 +21,7 @@ const Component = () => {
     if (!canvas) {
       setCanvas(
         new fabric.Canvas("canvasID", {
-          backgroundColor: "#e7e7e7"
+          backgroundColor
         })
       );
     }
@@ -31,8 +34,8 @@ const Component = () => {
 
       const fillBackground = element => {
         if (canvas.getActiveObject().get("type") === "i-text") {
-          setBackgroundColorToggled(true);
-          setBackgroundColor(element[0].backgroundColor);
+          setTextBackgroundColorToggled(true);
+          setTextBackgroundColor(element[0].backgroundColor);
         }
       };
 
@@ -84,13 +87,13 @@ const Component = () => {
       });
       canvas.on("selection:cleared", () => {
         setColorToggle(false);
-        setBackgroundColorToggled(false);
+        setTextBackgroundColorToggled(false);
         setActiveObj(null);
         document.removeEventListener("keydown", keyChanges);
         canvas.renderAll();
       });
     }
-  }, [canvas, remove, activeObj]);
+  }, [canvas, remove, activeObj, backgroundColor]);
 
   const changeColor = newColor => {
     setColor(newColor);
@@ -100,8 +103,8 @@ const Component = () => {
     canvas.renderAll();
   };
 
-  const changeBackgroundColor = newColor => {
-    setBackgroundColor(newColor);
+  const changeTextBackgroundColor = newColor => {
+    setTextBackgroundColor(newColor);
     canvas.getActiveObject().set({
       backgroundColor: newColor
     });
@@ -192,6 +195,11 @@ const Component = () => {
     activeObj.sendBackwards();
     canvas.renderAll();
   };
+  const changeBackgroundColor = value => {
+    setBackgroundColor(value);
+    canvas.backgroundColor = value;
+    canvas.renderAll();
+  };
 
   const options = useMemo(() => [16, 18, 20, 22, 24, 26, 28, 30], []);
 
@@ -218,12 +226,23 @@ const Component = () => {
         <button
           type="button"
           onClick={() => {
+            // eslint-disable-next-line no-console
             console.log(canvas.getObjects());
           }}
         >
           get directions
         </button>
         <input type="file" onChange={e => addImage(e.target.files[0])} />
+
+        <label style={{ padding: "5px" }}>
+          background Color
+          <input
+            style={{ margin: "10px" }}
+            type="color"
+            value={backgroundColor}
+            onChange={e => changeBackgroundColor(e.target.value)}
+          />
+        </label>
 
         {activeObj && (
           <button type="button" onClick={() => remove()}>
@@ -250,15 +269,15 @@ const Component = () => {
             </button>
           </>
         )}
-        {backgroundColorToggled && activeObj && (
+        {textBackgroundColorToggled && activeObj && (
           <>
             <hr />
             <label>
               Change background color
               <input
                 type="color"
-                value={backgroundColor}
-                onChange={e => changeBackgroundColor(e.target.value)}
+                value={textBackgroundColor}
+                onChange={e => changeTextBackgroundColor(e.target.value)}
               />
             </label>
             <label>
