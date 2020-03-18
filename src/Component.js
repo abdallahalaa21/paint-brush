@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useEffect, useCallback, useState, useMemo } from "react";
 import { fabric } from "fabric";
 
 const Component = () => {
@@ -72,13 +72,13 @@ const Component = () => {
       };
 
       canvas.on("selection:created", ({ selected }) => {
-        setActiveObj(selected);
+        setActiveObj(selected[0]);
         fillBackground(selected);
         fillColor(selected);
         document.addEventListener("keydown", keyChanges);
       });
       canvas.on("selection:updated", ({ selected }) => {
-        setActiveObj(selected);
+        setActiveObj(selected[0]);
         fillBackground(selected);
         fillColor(selected);
       });
@@ -90,11 +90,11 @@ const Component = () => {
         canvas.renderAll();
       });
     }
-  }, [canvas, remove]);
+  }, [canvas, remove, activeObj]);
 
   const changeColor = newColor => {
     setColor(newColor);
-    activeObj.set({
+    canvas.getActiveObject().set({
       fill: newColor
     });
     canvas.renderAll();
@@ -102,7 +102,7 @@ const Component = () => {
 
   const changeBackgroundColor = newColor => {
     setBackgroundColor(newColor);
-    activeObj.set({
+    canvas.getActiveObject().set({
       backgroundColor: newColor
     });
     canvas.renderAll();
@@ -124,6 +124,45 @@ const Component = () => {
     });
     return canvas.add(textElement);
   }, [canvas]);
+
+  const changeFont = size => {
+    canvas.getActiveObject().set({
+      fontSize: size
+    });
+    canvas.renderAll();
+  };
+
+  const bold = () => {
+    canvas.getActiveObject().set({
+      fontWeight:
+        canvas.getActiveObject()?.fontWeight === "bold" ? "normal" : "bold"
+    });
+    canvas.renderAll();
+  };
+
+  const italic = () => {
+    canvas.getActiveObject().set({
+      fontStyle:
+        canvas.getActiveObject()?.fontStyle === "italic" ? "normal" : "italic"
+    });
+    canvas.renderAll();
+  };
+
+  const underline = () => {
+    canvas.getActiveObject().set({
+      underline: !canvas.getActiveObject()?.underline
+    });
+    canvas.renderAll();
+  };
+
+  const textAlign = value => {
+    canvas.getActiveObject().set({
+      textAlign: value
+    });
+    canvas.renderAll();
+  };
+
+  const options = useMemo(() => [16, 18, 20, 22, 24, 26, 28, 30], []);
 
   return (
     <div style={{ marginLeft: "200px" }}>
@@ -160,26 +199,58 @@ const Component = () => {
           </button>
         )}
 
-        {colorToggled && (
-          <label>
-            Change Color
+        {colorToggled && activeObj && (
+          <label style={{ padding: "5px" }}>
+            Color
             <input
+              style={{ margin: "10px" }}
               type="color"
               value={color}
               onChange={e => changeColor(e.target.value)}
             />
           </label>
         )}
-
-        {backgroundColorToggled && (
-          <label>
-            Change background color
-            <input
-              type="color"
-              value={backgroundColor}
-              onChange={e => changeBackgroundColor(e.target.value)}
-            />
-          </label>
+        {backgroundColorToggled && activeObj && (
+          <>
+            <hr />
+            <label>
+              Change background color
+              <input
+                type="color"
+                value={backgroundColor}
+                onChange={e => changeBackgroundColor(e.target.value)}
+              />
+            </label>
+            <label>
+              font size
+              <select
+                defaultValue={activeObj.fontSize}
+                onChange={e => changeFont(e.target.value)}
+              >
+                {options.map(item => (
+                  <option key={item} value={item}>{`${item} px`}</option>
+                ))}
+              </select>
+            </label>
+            <button type="button" onClick={() => bold()}>
+              bold
+            </button>
+            <button type="button" onClick={() => italic()}>
+              italic
+            </button>
+            <button type="button" onClick={() => underline()}>
+              underline
+            </button>
+            <button type="button" onClick={() => textAlign("left")}>
+              left
+            </button>
+            <button type="button" onClick={() => textAlign("center")}>
+              center
+            </button>
+            <button type="button" onClick={() => textAlign("right")}>
+              right
+            </button>
+          </>
         )}
       </div>
     </div>
