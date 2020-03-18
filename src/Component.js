@@ -162,6 +162,16 @@ const Component = () => {
     canvas.renderAll();
   };
 
+  const sendFront = () => {
+    activeObj.bringForward();
+    canvas.renderAll();
+  };
+
+  const sendBack = () => {
+    activeObj.sendBackwards();
+    canvas.renderAll();
+  };
+
   const options = useMemo(() => [16, 18, 20, 22, 24, 26, 28, 30], []);
 
   return (
@@ -200,15 +210,23 @@ const Component = () => {
         )}
 
         {colorToggled && activeObj && (
-          <label style={{ padding: "5px" }}>
-            Color
-            <input
-              style={{ margin: "10px" }}
-              type="color"
-              value={color}
-              onChange={e => changeColor(e.target.value)}
-            />
-          </label>
+          <>
+            <label style={{ padding: "5px" }}>
+              Color
+              <input
+                style={{ margin: "10px" }}
+                type="color"
+                value={color}
+                onChange={e => changeColor(e.target.value)}
+              />
+            </label>
+            <button type="button" onClick={() => sendFront()}>
+              bring to front
+            </button>
+            <button type="button" onClick={() => sendBack()}>
+              send to back
+            </button>
+          </>
         )}
         {backgroundColorToggled && activeObj && (
           <>
