@@ -12,6 +12,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.19.0",
     "fabric": "^3.6.2",
+    "jspdf": "^1.5.3",
     "node-sass": "^4.13.1",
     "prettier": "^1.19.1",
     "react": "^16.13.0",

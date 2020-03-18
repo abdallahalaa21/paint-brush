@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useEffect, useCallback, useState, useMemo } from "react";
 import { fabric } from "fabric";
+import * as JsPDF from "jspdf";
 
 const Component = () => {
   const [canvas, setCanvas] = useState(null);
@@ -217,6 +218,24 @@ const Component = () => {
     reader.readAsDataURL(value);
   };
 
+  const savePdf = () => {
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+    const { width } = canvas;
+    const { height } = canvas;
+    let pdf;
+    // set the orientation
+    if (width > height) {
+      pdf = new JsPDF("l", "px", [width, height]);
+    } else {
+      pdf = new JsPDF("p", "px", [height, width]);
+    }
+    const widthPdf = pdf.internal.pageSize.getWidth();
+    const heightPdf = pdf.internal.pageSize.getHeight();
+
+    pdf.addImage(imgData, "JPEG", 0, 0, widthPdf, heightPdf);
+    pdf.save("download.pdf");
+  };
+
   const options = useMemo(() => [16, 18, 20, 22, 24, 26, 28, 30], []);
 
   return (
@@ -230,7 +249,9 @@ const Component = () => {
       >
         <p>presentation test</p>
         <canvas id="canvasID" width="800px" height="300px" />
-
+        <button type="button" onClick={() => savePdf()}>
+          savePdf
+        </button>
         <button type="button" onClick={() => rec()}>
           add rectangle
         </button>
@@ -238,7 +259,6 @@ const Component = () => {
         <button type="button" onClick={() => text()}>
           add text
         </button>
-
         <button
           type="button"
           onClick={() => {
