@@ -1,4 +1,10 @@
-import React, { useCallback, useState, useMemo } from "react";
+import React, {
+  useCallback,
+  useState,
+  useMemo,
+  useEffect,
+  useLayoutEffect
+} from "react";
 import { fabric } from "fabric";
 import * as JsPDF from "jspdf";
 import Component from "./Component";
@@ -9,8 +15,8 @@ const App = () => {
   const [backgroundColor, setBackgroundColor] = useState("#e7e7e7");
   const [textBackgroundColor, setTextBackgroundColor] = useState("#e7e7e7");
   const [activeObj, setActiveObj] = useState(null);
-
-  const activePage = useMemo(() => pages[0], [pages]);
+  const [activePage, setActivePage] = useState(pages[0]);
+  const [inputList, setInputList] = useState([]);
 
   const selectedElement = useCallback(element => {
     setActiveObj(element);
@@ -20,49 +26,47 @@ const App = () => {
     if (!element?.backgroundColor) setTextBackgroundColor("e7e7e7");
   }, []);
 
+  const selectedPage = useCallback(
+    e => {
+      const currentPage = Math.floor(
+        e.target.scrollTop / e.target.clientHeight
+      );
+      setActivePage(prev => {
+        if (prev !== pages[currentPage]) {
+          selectedElement(null);
+          activePage.discardActiveObject().renderAll();
+          return pages[currentPage];
+        }
+        return pages[currentPage];
+      });
+    },
+    [pages, setActivePage, selectedElement, activePage]
+  );
+
+  useEffect(() => {
+    if (!activePage) {
+      setActivePage(pages[0]);
+    }
+  }, [activePage, pages]);
+
+  useEffect(() => {
+    document
+      .getElementById("pagesContainer")
+      .addEventListener("scroll", selectedPage);
+    return () => {
+      document
+        .getElementById("pagesContainer")
+        .removeEventListener("scroll", selectedPage);
+    };
+  }, [selectedPage]);
+
   const addPage = useCallback(page => {
     setPages(prevState => [...prevState, page]);
   }, []);
 
-  const remove = useCallback(() => {
-    activePage.remove(activePage.getActiveObject());
-  }, [activePage]);
-
-  const keyChanges = e => {
-    if (
-      (activePage.getActiveObject().get("type") === "i-text" &&
-        activePage.getActiveObject().selected) ||
-      activePage.getActiveObject().get("type") === "image" ||
-      activePage.getActiveObject().get("type") === "rect"
-    ) {
-      switch (e.keyCode) {
-        case 46:
-          remove();
-          break;
-        case 39: // move right
-          e.preventDefault();
-          activePage.getActiveObject().left += 1;
-          activePage.renderAll();
-          break;
-        case 37: // move left
-          e.preventDefault();
-          activePage.getActiveObject().left -= 1;
-          activePage.renderAll();
-          break;
-        case 40: // move down
-          e.preventDefault();
-          activePage.getActiveObject().top += 1;
-          activePage.renderAll();
-          break;
-        case 38: // move up
-          e.preventDefault();
-          activePage.getActiveObject().top -= 1;
-          activePage.renderAll();
-          break;
-        default:
-      }
-    }
-  };
+  const remove = useCallback(canvas => {
+    canvas.remove(canvas.getActiveObject());
+  }, []);
 
   const rec = useCallback(() => {
     const rect = new fabric.Rect({
@@ -203,16 +207,36 @@ const App = () => {
     activePage.renderAll();
   };
 
+  const addNewPage = () => {
+    setInputList(
+      inputList.concat(
+        <Component
+          remove={remove}
+          addPage={addPage}
+          backgroundColor={backgroundColor}
+          selectedElement={selectedElement}
+          id={(inputList.length + 1).toString()}
+          activeObj={activeObj}
+          setActivePage={setActivePage}
+        />
+      )
+    );
+  };
+  useLayoutEffect(() => addNewPage(), []);
+
   return (
     <div
       style={{
         display: "flex",
         justifyContent: "center",
         flexDirection: "column",
-        margin: "0 11%"
+        margin: "0 60px"
       }}
     >
       <p>presentation test</p>
+      <button type="button" onClick={addNewPage}>
+        Add new page
+      </button>
       <div>
         <button type="button" onClick={() => rec()}>
           add rectangle
@@ -227,6 +251,7 @@ const App = () => {
           type="button"
           onClick={() => {
             // eslint-disable-next-line no-console
+            console.log(activePage);
             console.log(activePage.getObjects());
             activePage.getObjects().map(ele => {
               // eslint-disable-next-line no-console
@@ -283,7 +308,7 @@ const App = () => {
             <button type="button" onClick={() => sendBack()}>
               send to back
             </button>
-            <button type="button" onClick={() => remove()}>
+            <button type="button" onClick={() => remove(activePage)}>
               Delete
             </button>
             <label htmlFor="fill" style={{ padding: "5px" }}>
@@ -345,17 +370,13 @@ const App = () => {
       <div
         style={{
           boxShadow: "0 1px 3px 1px rgba(0, 0, 0, 0.16)",
-          // height: "100vh",
-          width: "100%"
+          height: "400px",
+          width: "100%",
+          overflow: "scroll"
         }}
+        id="pagesContainer"
       >
-        <Component
-          addPage={addPage}
-          backgroundColor={backgroundColor}
-          selectedElement={selectedElement}
-          keyChanges={keyChanges}
-          id="1"
-        />
+        {inputList}
       </div>
     </div>
   );
