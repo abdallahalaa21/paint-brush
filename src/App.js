@@ -19,6 +19,11 @@ const App = () => {
   const [inputList, setInputList] = useState([]);
 
   const selectedElement = useCallback(element => {
+    if (!element) {
+      setActiveObj(null);
+      setColor("#000000");
+      setTextBackgroundColor("e7e7e7");
+    }
     setActiveObj(element);
     if (element?.fill) setColor(element.fill);
     if (element?.backgroundColor)
@@ -34,7 +39,8 @@ const App = () => {
       setActivePage(prev => {
         if (prev !== pages[currentPage]) {
           selectedElement(null);
-          activePage.discardActiveObject().renderAll();
+          activePage.discardActiveObject();
+          activePage.renderAll();
           return pages[currentPage];
         }
         return pages[currentPage];
@@ -218,6 +224,7 @@ const App = () => {
           id={(inputList.length + 1).toString()}
           activeObj={activeObj}
           setActivePage={setActivePage}
+          activePage={activePage}
         />
       )
     );

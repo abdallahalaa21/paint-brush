@@ -8,7 +8,8 @@ const Component = ({
   selectedElement,
   remove,
   setActivePage,
-  id
+  id,
+  activePage
 }) => {
   const [canvas, setCanvas] = useState(null);
   const [isSelected, setIsSelected] = useState(false);
@@ -20,6 +21,13 @@ const Component = ({
         !activeObj
       ) {
         setIsSelected(true);
+      } else if (
+        e?.target?.parentNode?.parentNode?.id?.includes("Container") &&
+        e?.target?.parentNode?.parentNode?.id !== `Container${id}`
+      ) {
+        canvas.discardActiveObject();
+        canvas.renderAll();
+        setIsSelected(false);
       } else {
         setIsSelected(false);
       }
@@ -80,8 +88,10 @@ const Component = ({
       };
 
       canvas.on("selection:created", ({ selected }) => {
+        if (activePage !== canvas) {
+          setActivePage(canvas);
+        }
         selectedElement(selected[0]);
-        setActivePage(canvas);
         document.addEventListener("keydown", keyChanges);
       });
       canvas.on("selection:updated", ({ selected }) => {
@@ -100,7 +110,8 @@ const Component = ({
     selectedElement,
     id,
     remove,
-    setActivePage
+    setActivePage,
+    activePage
   ]);
 
   return (
