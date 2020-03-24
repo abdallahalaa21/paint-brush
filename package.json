@@ -17,7 +17,8 @@
     "prettier": "^1.19.1",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
-    "react-scripts": "3.4.0"
+    "react-scripts": "3.4.0",
+    "uuid": "^7.0.2"
   },
   "scripts": {
     "dev": "react-scripts start",

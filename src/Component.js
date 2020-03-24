@@ -9,10 +9,13 @@ const Component = ({
   remove,
   setActivePage,
   id,
-  activePage
+  activePage,
+  deletePage,
+  pages
 }) => {
   const [canvas, setCanvas] = useState(null);
   const [isSelected, setIsSelected] = useState(false);
+
   const selectCanvas = useCallback(
     e => {
       const activeObj = canvas?.getActiveObject();
@@ -32,7 +35,7 @@ const Component = ({
         setIsSelected(false);
       }
     },
-    [id, canvas]
+    [canvas, id]
   );
 
   useEffect(() => {
@@ -45,7 +48,8 @@ const Component = ({
   useEffect(() => {
     if (!canvas) {
       const canvasElement = new fabric.Canvas(id, {
-        backgroundColor
+        backgroundColor,
+        id
       });
       setCanvas(canvasElement);
       addPage(canvasElement);
@@ -95,7 +99,9 @@ const Component = ({
         document.addEventListener("keydown", keyChanges);
       });
       canvas.on("selection:updated", ({ selected }) => {
-        setActivePage(canvas);
+        if (activePage !== canvas) {
+          setActivePage(canvas);
+        }
         selectedElement(selected[0]);
       });
       canvas.on("selection:cleared", () => {
@@ -121,6 +127,9 @@ const Component = ({
         margin: "20px"
       }}
     >
+      <button type="button" onClick={() => deletePage(id)}>
+        Delete page
+      </button>
       <canvas
         id={id}
         width="800px"

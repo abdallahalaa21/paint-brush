@@ -6,6 +6,7 @@ import React, {
   useLayoutEffect
 } from "react";
 import { fabric } from "fabric";
+import uuid from "uuid/v4";
 import * as JsPDF from "jspdf";
 import Component from "./Component";
 
@@ -17,6 +18,7 @@ const App = () => {
   const [activeObj, setActiveObj] = useState(null);
   const [activePage, setActivePage] = useState(pages[0]);
   const [inputList, setInputList] = useState([]);
+  const [selected, setSelected] = useState(9);
 
   const selectedElement = useCallback(element => {
     if (!element) {
@@ -30,6 +32,19 @@ const App = () => {
       setTextBackgroundColor(element.backgroundColor);
     if (!element?.backgroundColor) setTextBackgroundColor("e7e7e7");
   }, []);
+
+  const deletePage = useCallback(
+    id => {
+      if (inputList.length > 1) {
+        setPages(prev => prev.filter(page => page.id !== id));
+        setInputList(prev => prev.filter(page => page.id !== id));
+        selectedElement(null);
+        activePage.discardActiveObject();
+        activePage.renderAll();
+      }
+    },
+    [activePage, inputList, selectedElement]
+  );
 
   const selectedPage = useCallback(
     e => {
@@ -214,20 +229,7 @@ const App = () => {
   };
 
   const addNewPage = () => {
-    setInputList(
-      inputList.concat(
-        <Component
-          remove={remove}
-          addPage={addPage}
-          backgroundColor={backgroundColor}
-          selectedElement={selectedElement}
-          id={(inputList.length + 1).toString()}
-          activeObj={activeObj}
-          setActivePage={setActivePage}
-          activePage={activePage}
-        />
-      )
-    );
+    setInputList(prev => [...prev, { Canvas: Component, id: uuid() }]);
   };
 
   useLayoutEffect(() => addNewPage(), []);
@@ -242,9 +244,11 @@ const App = () => {
       }}
     >
       <p>presentation test</p>
-      <button type="button" onClick={addNewPage}>
-        Add new page
-      </button>
+      <div>
+        <button type="button" onClick={addNewPage}>
+          Add new page
+        </button>
+      </div>
       <div>
         <button type="button" onClick={() => rec()}>
           add rectangle
@@ -258,6 +262,7 @@ const App = () => {
         <button
           type="button"
           onClick={() => {
+            console.log("pages", pages);
             // eslint-disable-next-line no-console
             console.log(activePage);
             // eslint-disable-next-line no-console
@@ -385,7 +390,22 @@ const App = () => {
         }}
         id="pagesContainer"
       >
-        {inputList}
+        {inputList.map(({ Canvas, id }) => (
+          <Canvas
+            remove={remove}
+            addPage={addPage}
+            backgroundColor={backgroundColor}
+            selectedElement={selectedElement}
+            id={id}
+            activeObj={activeObj}
+            setActivePage={setActivePage}
+            activePage={activePage}
+            setSelected={setSelected}
+            selected={selected}
+            deletePage={deletePage}
+            pages={pages}
+          />
+        ))}
       </div>
     </div>
   );
