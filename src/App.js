@@ -229,6 +229,7 @@ const App = () => {
       )
     );
   };
+
   useLayoutEffect(() => addNewPage(), []);
 
   return (
@@ -259,6 +260,7 @@ const App = () => {
           onClick={() => {
             // eslint-disable-next-line no-console
             console.log(activePage);
+            // eslint-disable-next-line no-console
             console.log(activePage.getObjects());
             activePage.getObjects().map(ele => {
               // eslint-disable-next-line no-console

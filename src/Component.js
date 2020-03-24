@@ -137,7 +137,8 @@ Component.propTypes = {
   selectedElement: PropTypes.func.isRequired,
   remove: PropTypes.func.isRequired,
   setActivePage: PropTypes.func.isRequired,
-  id: PropTypes.string.isRequired
+  id: PropTypes.string.isRequired,
+  activePage: PropTypes.object.isRequired
 };
 
 export default Component;
