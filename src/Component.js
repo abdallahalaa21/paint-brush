@@ -10,8 +10,7 @@ const Component = ({
   setActivePage,
   id,
   activePage,
-  deletePage,
-  pages
+  deletePage
 }) => {
   const [canvas, setCanvas] = useState(null);
   const [isSelected, setIsSelected] = useState(false);
@@ -147,7 +146,8 @@ Component.propTypes = {
   remove: PropTypes.func.isRequired,
   setActivePage: PropTypes.func.isRequired,
   id: PropTypes.string.isRequired,
-  activePage: PropTypes.object.isRequired
+  activePage: PropTypes.object.isRequired,
+  deletePage: PropTypes.func.isRequired
 };
 
 export default Component;

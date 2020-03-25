@@ -18,7 +18,6 @@ const App = () => {
   const [activeObj, setActiveObj] = useState(null);
   const [activePage, setActivePage] = useState(pages[0]);
   const [inputList, setInputList] = useState([]);
-  const [selected, setSelected] = useState(9);
 
   const selectedElement = useCallback(element => {
     if (!element) {
@@ -234,6 +233,21 @@ const App = () => {
 
   useLayoutEffect(() => addNewPage(), []);
 
+  const resetZoom = page => {
+    const zoomRatio = page.getZoom();
+    page.setWidth(page.width / zoomRatio);
+    page.setHeight(page.height / zoomRatio);
+    page.setZoom(1);
+  };
+  const zoomFunc = e => {
+    pages.forEach(page => {
+      resetZoom(page);
+      const zoom = parseFloat(e.target.value, 10);
+      page.setZoom(zoom);
+      page.setWidth(page.width * zoom);
+      page.setHeight(page.height * zoom);
+    });
+  };
   return (
     <div
       style={{
@@ -248,6 +262,19 @@ const App = () => {
         <button type="button" onClick={addNewPage}>
           Add new page
         </button>
+        <label htmlFor="zoom">
+          zoom
+          <select name="zoom" defaultValue={1} onChange={e => zoomFunc(e)}>
+            <option value={2}>200%</option>
+            <option value={1.75}>175%</option>
+            <option value={1.5}>150%</option>
+            <option value={1.25}>125%</option>
+            <option value={1}>100%</option>
+            <option value={0.75}>75%</option>
+            <option value={0.5}>50%</option>
+            <option value={0.25}>25%</option>
+          </select>
+        </label>
       </div>
       <div>
         <button type="button" onClick={() => rec()}>
@@ -262,6 +289,7 @@ const App = () => {
         <button
           type="button"
           onClick={() => {
+            // eslint-disable-next-line no-console
             console.log("pages", pages);
             // eslint-disable-next-line no-console
             console.log(activePage);
@@ -397,13 +425,9 @@ const App = () => {
             backgroundColor={backgroundColor}
             selectedElement={selectedElement}
             id={id}
-            activeObj={activeObj}
             setActivePage={setActivePage}
             activePage={activePage}
-            setSelected={setSelected}
-            selected={selected}
             deletePage={deletePage}
-            pages={pages}
           />
         ))}
       </div>
