@@ -6,7 +6,7 @@ import React, {
   useLayoutEffect
 } from "react";
 import { fabric } from "fabric";
-import uuid from "uuid/v4";
+import { v4 as uuid } from "uuid";
 import * as JsPDF from "jspdf";
 import Component from "./Component";
 
@@ -199,24 +199,6 @@ const App = () => {
 
   const options = useMemo(() => [16, 18, 20, 22, 24, 26, 28, 30], []);
 
-  const savePdf = () => {
-    const imgData = activePage.toDataURL("image/jpeg", 1.0);
-    const { width } = activePage;
-    const { height } = activePage;
-    let pdf;
-    // set the orientation
-    if (width > height) {
-      pdf = new JsPDF("l", "px", [width, height]);
-    } else {
-      pdf = new JsPDF("p", "px", [height, width]);
-    }
-    const widthPdf = pdf.internal.pageSize.getWidth();
-    const heightPdf = pdf.internal.pageSize.getHeight();
-
-    pdf.addImage(imgData, "JPEG", 0, 0, widthPdf, heightPdf);
-    pdf.save("download.pdf");
-  };
-
   const sendFront = () => {
     activeObj.bringForward();
     activePage.renderAll();
@@ -235,10 +217,12 @@ const App = () => {
 
   const resetZoom = page => {
     const zoomRatio = page.getZoom();
+    page.setZoom(1);
     page.setWidth(page.width / zoomRatio);
     page.setHeight(page.height / zoomRatio);
-    page.setZoom(1);
+    page.renderAll();
   };
+
   const zoomFunc = e => {
     pages.forEach(page => {
       resetZoom(page);
@@ -248,6 +232,31 @@ const App = () => {
       page.setHeight(page.height * zoom);
     });
   };
+
+  const savePdf = () => {
+    resetZoom(activePage);
+    const { width } = activePage;
+    const { height } = activePage;
+    let pdf;
+    // set the orientation
+    if (width > height) {
+      pdf = new JsPDF("l", "px", [width, height]);
+    } else {
+      pdf = new JsPDF("p", "px", [height, width]);
+    }
+    const widthPdf = pdf.internal.pageSize.getWidth();
+    const heightPdf = pdf.internal.pageSize.getHeight();
+    pages.forEach((page, index) => {
+      resetZoom(page);
+      const imgData = page.toDataURL("image/jpeg", 1.0);
+      pdf.addImage(imgData, "JPEG", 0, 0, widthPdf, heightPdf);
+      if (pages.length - index > 1) {
+        pdf.addPage();
+      }
+    });
+    pdf.save("download.pdf");
+  };
+
   return (
     <div
       style={{
