@@ -257,6 +257,72 @@ const App = () => {
     pdf.save("download.pdf");
   };
 
+  const saveContent = () => {
+    pages.map(page => {
+      const { id, backgroundColor, width, height } = page;
+      const pageInfo = { id, backgroundColor, width, height };
+      pageInfo.objects = [];
+      page.getObjects().map(ele => {
+        if (ele.get("type") === "i-text") {
+          const {
+            text,
+            fontSize,
+            fill,
+            backgroundColor,
+            width,
+            height,
+            left,
+            top,
+            scaleX,
+            scaleY,
+            angle,
+            fontWeight,
+            fontStyle,
+            underline,
+            textAlign
+          } = ele;
+          const object = {
+            text,
+            fontSize,
+            fill,
+            backgroundColor,
+            width,
+            height,
+            left,
+            top,
+            scaleX,
+            scaleY,
+            angle,
+            fontWeight,
+            fontStyle,
+            underline,
+            textAlign,
+            type: ele.get("type")
+          };
+          pageInfo.objects.push(object);
+        }
+        // eslint-disable-next-line no-console
+        // console.log(ele);
+        // eslint-disable-next-line no-console
+        // return console.log(activePage.getObjects().indexOf(ele));
+      });
+
+      return console.log(pageInfo);
+    });
+    // eslint-disable-next-line no-console
+    // console.log("pages", pages);
+    // eslint-disable-next-line no-console
+    // console.log(activePage);
+    // eslint-disable-next-line no-console
+    // console.log(activePage.getObjects());
+    // activePage.getObjects().map(ele => {
+    //   // eslint-disable-next-line no-console
+    //   console.log(ele);
+    //   // eslint-disable-next-line no-console
+    //   return console.log(activePage.getObjects().indexOf(ele));
+    // });
+  };
+
   return (
     <div
       style={{
@@ -295,23 +361,7 @@ const App = () => {
         <button type="button" onClick={() => text()}>
           add text
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            // eslint-disable-next-line no-console
-            console.log("pages", pages);
-            // eslint-disable-next-line no-console
-            console.log(activePage);
-            // eslint-disable-next-line no-console
-            console.log(activePage.getObjects());
-            activePage.getObjects().map(ele => {
-              // eslint-disable-next-line no-console
-              console.log(ele);
-              // eslint-disable-next-line no-console
-              return console.log(activePage.getObjects().indexOf(ele));
-            });
-          }}
-        >
+        <button type="button" onClick={() => saveContent()}>
           get directions
         </button>
         <label htmlFor="addImage" style={{ padding: "5px" }}>
@@ -429,6 +479,7 @@ const App = () => {
       >
         {inputList.map(({ Canvas, id }) => (
           <Canvas
+            key={id}
             remove={remove}
             addPage={addPage}
             backgroundColor={backgroundColor}

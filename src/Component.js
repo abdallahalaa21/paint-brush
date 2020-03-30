@@ -146,8 +146,12 @@ Component.propTypes = {
   remove: PropTypes.func.isRequired,
   setActivePage: PropTypes.func.isRequired,
   id: PropTypes.string.isRequired,
-  activePage: PropTypes.object.isRequired,
+  activePage: PropTypes.object,
   deletePage: PropTypes.func.isRequired
+};
+
+Component.defaultProps = {
+  activePage: {}
 };
 
 export default Component;
